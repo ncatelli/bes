@@ -59,11 +59,11 @@ type Rom = Memory<ReadOnly, u16, u8>;
 type Ram = Memory<ReadWrite, u16, u8>;
 
 fn simulate(cycles: usize, bin: Vec<u8>) -> RuntimeResult<Mos6502> {
-    let ram = Ram::new(0x0000, 0x3fff);
+    let ram = Ram::new(0x0200, 0x3fff);
     let via = Ram::new(0x6000, 0x7fff);
     let rom = Rom::new(0x8000, 0xffff).load(bin);
     let cpu = Mos6502::default()
-        .register_address_space(0x0000..=0x7fff, ram)
+        .register_address_space(0x0200..=0x3fff, ram)
         .map_err(RuntimeError::Undefined)?
         .register_address_space(0x6000..=0x7fff, via)
         .map_err(RuntimeError::Undefined)?
@@ -106,7 +106,7 @@ fn main() {
         .and_then(|flags| cmd.dispatch(flags));
 
     match eval_res {
-        Ok(_) => (),
-        Err(e) => println!("{}\n\n{}", &e.to_string(), &help_string),
+        Ok(Ok(cpu)) => println!("{:#?}", cpu),
+        Ok(Err(e)) | Err(e) => println!("{}\n\n{}", &e.to_string(), &help_string),
     }
 }
