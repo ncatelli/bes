@@ -88,14 +88,15 @@ fn main() {
             "i",
             "an input path for a source file.",
         ))
-        .with_flag(scrap::Flag::expect_string(
+        .with_flag(scrap::Flag::expect_u64(
             "cycles",
             "c",
             "The number of cycles to run the simulator for.",
         ))
-        .with_handler(|(input_file, _cycles)| {
-            read_src_file(&input_file)
-                .and_then(|src| assemble_object(&src).map(|binary| simulate(1000, binary)))
+        .with_handler(|(input_file, cycles)| {
+            read_src_file(&input_file).and_then(|src| {
+                assemble_object(&src).map(|binary| simulate(cycles as usize, binary))
+            })
         });
 
     let help_string = cmd.help();
