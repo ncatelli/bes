@@ -10,12 +10,14 @@ use std::io::prelude::*;
 enum RuntimeError {
     FileUnreadable,
     Undefined(String),
+    Simulator(String),
 }
 
 impl fmt::Debug for RuntimeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::FileUnreadable => write!(f, "source file unreadable"),
+            Self::Simulator(e) => write!(f, "simulator error: {}", e),
             Self::Undefined(s) => write!(f, "{}", s),
         }
     }
@@ -64,11 +66,9 @@ fn simulate(cycles: usize, bin: Vec<u8>) -> RuntimeResult<Mos6502> {
     let rom = Rom::new(0x8000, 0xffff).load(bin);
     let cpu = Mos6502::default()
         .register_address_space(0x0200..=0x3fff, ram)
-        .map_err(RuntimeError::Undefined)?
-        .register_address_space(0x6000..=0x7fff, via)
-        .map_err(RuntimeError::Undefined)?
-        .register_address_space(0x8000..=0xffff, rom)
-        .map_err(RuntimeError::Undefined)?
+        .and_then(|cpu| cpu.register_address_space(0x6000..=0x7fff, via))
+        .and_then(|cpu| cpu.register_address_space(0x8000..=0xffff, rom))
+        .map_err(RuntimeError::Simulator)?
         .reset()
         .unwrap();
 
