@@ -7,3 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+mainspring = { git = "https://github.com/ncatelli/mainspring", branch = "main" }
+spasm = { git = "https://github.com/ncatelli/spasm", branch = "master" }
+scrap = { git = "https://github.com/ncatelli/scrap", branch = "main" }
