@@ -4,11 +4,9 @@ use spasm::Backend;
 use spasm::Emitter;
 use std::env;
 use std::fmt;
-use std::fs::File;
 use std::io::prelude::*;
 
 enum RuntimeError {
-    FileUnreadable,
     Undefined(String),
     Simulator(String),
 }
@@ -16,7 +14,6 @@ enum RuntimeError {
 impl fmt::Debug for RuntimeError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::FileUnreadable => write!(f, "source file unreadable"),
             Self::Simulator(e) => write!(f, "simulator error: {}", e),
             Self::Undefined(s) => write!(f, "{}", s),
         }
@@ -33,11 +30,9 @@ type RuntimeResult<T> = Result<T, RuntimeError>;
 
 // Assembler
 
-fn read_src_file(filename: &str) -> RuntimeResult<String> {
-    let mut f = File::open(filename).map_err(|_| RuntimeError::FileUnreadable)?;
-
+fn read_src_file(mut src_file: std::fs::File) -> RuntimeResult<String> {
     let mut contents = String::new();
-    match f.read_to_string(&mut contents) {
+    match src_file.read_to_string(&mut contents) {
         Ok(_) => Ok(contents),
         Err(e) => Err(RuntimeError::Undefined(e.to_string())),
     }
@@ -83,18 +78,21 @@ fn main() {
         .description("A development assembler/simulator tool for the BE6502")
         .author("Nate Catelli <ncatelli@packetfire.org>")
         .version("0.1.0")
-        .with_flag(scrap::Flag::expect_string(
+        .with_flag(scrap::WithOpen::new(scrap::ExpectFilePath::new(
             "input-file",
             "i",
             "an input path for a source file.",
-        ))
+            true,
+            false,
+            true,
+        )))
         .with_flag(scrap::Flag::expect_u64(
             "cycles",
             "c",
             "The number of cycles to run the simulator for.",
         ))
         .with_handler(|(input_file, cycles)| {
-            read_src_file(&input_file).and_then(|src| {
+            read_src_file(input_file).and_then(|src| {
                 assemble_object(&src).map(|binary| simulate(cycles as usize, binary))
             })
         });
@@ -107,6 +105,6 @@ fn main() {
 
     match eval_res {
         Ok(Ok(cpu)) => println!("{:#?}", cpu),
-        Ok(Err(e)) | Err(e) => println!("{}\n\n{}", &e.to_string(), &help_string),
+        Ok(Err(e)) | Err(e) => println!("error: {}\n\n{}", &e.to_string(), &help_string),
     }
 }
