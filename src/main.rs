@@ -83,10 +83,13 @@ fn main() {
         .description("A development assembler/simulator tool for the BE6502")
         .author("Nate Catelli <ncatelli@packetfire.org>")
         .version("0.1.0")
-        .with_flag(scrap::Flag::expect_string(
+        .with_flag(scrap::ExpectFilePath::new(
             "input-file",
             "i",
             "an input path for a source file.",
+            true,
+            false,
+            true,
         ))
         .with_flag(scrap::Flag::expect_u64(
             "cycles",
