@@ -32,8 +32,7 @@ pub type RuntimeResultJsSafe<T> = Result<T, JsValue>;
 
 #[wasm_bindgen]
 pub fn assemble_object_js(asm_src: &str) -> RuntimeResultJsSafe<Vec<u8>> {
-    let v = assemble_object(asm_src).map_err(|e| JsValue::from_str(&format!("{:?}", e)))?;
-    Ok(v)
+    assemble_object(asm_src).map_err(|e| JsValue::from_str(&format!("{:?}", e)))
 }
 
 pub fn assemble_object(asm_src: &str) -> RuntimeResult<Vec<u8>> {
