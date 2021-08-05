@@ -1,32 +1,8 @@
 use scrap::prelude::v1::*;
-use spasm::assemble;
-use spasm::Backend;
-use spasm::Emitter;
 use std::env;
-use std::fmt;
 use std::io::prelude::*;
 
-enum RuntimeError {
-    Undefined(String),
-    Simulator(String),
-}
-
-impl fmt::Debug for RuntimeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Simulator(e) => write!(f, "simulator error: {}", e),
-            Self::Undefined(s) => write!(f, "{}", s),
-        }
-    }
-}
-
-impl fmt::Display for RuntimeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:?}", &self)
-    }
-}
-
-type RuntimeResult<T> = Result<T, RuntimeError>;
+use bes::*;
 
 // Assembler
 
@@ -36,12 +12,6 @@ fn read_src_file(mut src_file: std::fs::File) -> RuntimeResult<String> {
         Ok(_) => Ok(contents),
         Err(e) => Err(RuntimeError::Undefined(e.to_string())),
     }
-}
-
-fn assemble_object(asm_src: &str) -> RuntimeResult<Vec<u8>> {
-    let obj = assemble(Backend::Mos6502, asm_src).map_err(RuntimeError::Undefined)?;
-    let bin = obj.emit();
-    Ok(bin)
 }
 
 // Simulator

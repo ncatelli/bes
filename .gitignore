@@ -18,3 +18,7 @@ Cargo.lock
 bin/
 pkg/
 wasm-pack.log
+
+# www
+
+www/.bin
