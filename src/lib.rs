@@ -38,6 +38,17 @@ use mainspring::prelude::v1::*;
 type Rom = Memory<ReadOnly, u16, u8>;
 type Ram = Memory<ReadWrite, u16, u8>;
 
+#[wasm_bindgen]
+/// Provides a wasm wrapper around the Mos6502 type.
+pub struct Mos6502JsSafe(Mos6502);
+
+#[wasm_bindgen]
+pub fn simulate_js(cycles: usize, bin: Vec<u8>) -> RuntimeResultJsSafe<Mos6502JsSafe> {
+    simulate(cycles, bin)
+        .map(|mos| Mos6502JsSafe(mos))
+        .map_err(|e| JsValue::from_str(&format!("{:?}", e)))
+}
+
 pub fn simulate(cycles: usize, bin: Vec<u8>) -> RuntimeResult<Mos6502> {
     let ram = Ram::new(0x0200, 0x3fff);
     let via = Ram::new(0x6000, 0x7fff);
