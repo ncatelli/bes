@@ -1,6 +1,3 @@
-use spasm::assemble;
-use spasm::Backend;
-use spasm::Emitter;
 use std::fmt;
 
 mod utils;
@@ -29,6 +26,38 @@ impl fmt::Display for RuntimeError {
 
 pub type RuntimeResult<T> = Result<T, RuntimeError>;
 pub type RuntimeResultJsSafe<T> = Result<T, JsValue>;
+
+// simulator
+
+use mainspring::address_map::memory::{Memory, ReadOnly, ReadWrite};
+use mainspring::cpu::mos6502::Mos6502;
+
+#[allow(unused)]
+use mainspring::prelude::v1::*;
+
+type Rom = Memory<ReadOnly, u16, u8>;
+type Ram = Memory<ReadWrite, u16, u8>;
+
+pub fn simulate(cycles: usize, bin: Vec<u8>) -> RuntimeResult<Mos6502> {
+    let ram = Ram::new(0x0200, 0x3fff);
+    let via = Ram::new(0x6000, 0x7fff);
+    let rom = Rom::new(0x8000, 0xffff).load(bin);
+    let cpu = Mos6502::default()
+        .register_address_space(0x0200..=0x3fff, ram)
+        .and_then(|cpu| cpu.register_address_space(0x6000..=0x7fff, via))
+        .and_then(|cpu| cpu.register_address_space(0x8000..=0xffff, rom))
+        .map_err(RuntimeError::Simulator)?
+        .reset()
+        .unwrap();
+
+    Ok(cpu.run(cycles).unwrap())
+}
+
+// assembler
+
+use spasm::assemble;
+use spasm::Backend;
+use spasm::Emitter;
 
 #[wasm_bindgen]
 pub fn assemble_object_js(asm_src: &str) -> RuntimeResultJsSafe<Vec<u8>> {

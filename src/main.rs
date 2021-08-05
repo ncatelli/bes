@@ -4,40 +4,12 @@ use std::io::prelude::*;
 
 use bes::*;
 
-// Assembler
-
 fn read_src_file(mut src_file: std::fs::File) -> RuntimeResult<String> {
     let mut contents = String::new();
     match src_file.read_to_string(&mut contents) {
         Ok(_) => Ok(contents),
         Err(e) => Err(RuntimeError::Undefined(e.to_string())),
     }
-}
-
-// Simulator
-
-use mainspring::address_map::memory::{Memory, ReadOnly, ReadWrite};
-use mainspring::cpu::mos6502::Mos6502;
-
-#[allow(unused)]
-use mainspring::prelude::v1::*;
-
-type Rom = Memory<ReadOnly, u16, u8>;
-type Ram = Memory<ReadWrite, u16, u8>;
-
-fn simulate(cycles: usize, bin: Vec<u8>) -> RuntimeResult<Mos6502> {
-    let ram = Ram::new(0x0200, 0x3fff);
-    let via = Ram::new(0x6000, 0x7fff);
-    let rom = Rom::new(0x8000, 0xffff).load(bin);
-    let cpu = Mos6502::default()
-        .register_address_space(0x0200..=0x3fff, ram)
-        .and_then(|cpu| cpu.register_address_space(0x6000..=0x7fff, via))
-        .and_then(|cpu| cpu.register_address_space(0x8000..=0xffff, rom))
-        .map_err(RuntimeError::Simulator)?
-        .reset()
-        .unwrap();
-
-    Ok(cpu.run(cycles).unwrap())
 }
 
 fn main() {
