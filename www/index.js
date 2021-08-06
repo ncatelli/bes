@@ -18,10 +18,10 @@ function download(filename, contentType, data) {
 }
 
 assembleBtn.addEventListener("click", event => {
-    var binary = wasm.assemble_object_js(assemblyInputTextObject.value);
-    binaryOutputTextObject.textContent = Buffer.from(binary).toString('hex');
-    // Start file download.
+    var binary = wasm.assemble_object(assemblyInputTextObject.value);
+    binaryOutputTextObject.textContent = wasm.hexdump(binary);
 
+    // Start file download.
     var b64Binary = Buffer.from(binary).toString('base64');
     download("rom.bin", 'data:application/octet-stream;base64,', b64Binary);
 });
