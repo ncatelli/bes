@@ -1,5 +1,3 @@
-use std::fmt;
-
 mod utils;
 
 use wasm_bindgen::prelude::*;
@@ -9,8 +7,8 @@ pub enum RuntimeError {
     Simulator(String),
 }
 
-impl fmt::Debug for RuntimeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Debug for RuntimeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Simulator(e) => write!(f, "simulator error: {}", e),
             Self::Undefined(s) => write!(f, "{}", s),
@@ -18,8 +16,8 @@ impl fmt::Debug for RuntimeError {
     }
 }
 
-impl fmt::Display for RuntimeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl std::fmt::Display for RuntimeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", &self)
     }
 }
@@ -29,15 +27,20 @@ pub type RuntimeResultJsSafe<T> = Result<T, JsValue>;
 
 // simulator
 
+#[cfg(not(target_arch = "wasm32"))]
 use mainspring::address_map::memory::{Memory, ReadOnly, ReadWrite};
+#[cfg(not(target_arch = "wasm32"))]
 use mainspring::cpu::mos6502::Mos6502;
 
 #[allow(unused)]
 use mainspring::prelude::v1::*;
 
+#[cfg(not(target_arch = "wasm32"))]
 type Rom = Memory<ReadOnly, u16, u8>;
+#[cfg(not(target_arch = "wasm32"))]
 type Ram = Memory<ReadWrite, u16, u8>;
 
+#[cfg(not(target_arch = "wasm32"))]
 pub fn simulate(cycles: usize, bin: Vec<u8>) -> RuntimeResult<Mos6502> {
     let ram = Ram::new(0x0200, 0x3fff);
     let via = Ram::new(0x6000, 0x7fff);
@@ -60,11 +63,41 @@ use spasm::Backend;
 use spasm::Emitter;
 
 #[wasm_bindgen]
-pub fn assemble_object_js(asm_src: &str) -> RuntimeResultJsSafe<Vec<u8>> {
-    assemble_object(asm_src).map_err(|e| JsValue::from_str(&format!("{:?}", e)))
+pub fn hexdump(bytes: &[u8]) -> String {
+    let lines: Vec<String> = bytes
+        .chunks(16)
+        .enumerate()
+        .map(|(offset, bytes)| {
+            let line = bytes
+                .chunks(2)
+                .map(|two_byte_chunk| {
+                    two_byte_chunk
+                        .iter()
+                        .map(|b| format!("{:02x?}", b))
+                        .collect()
+                })
+                .collect::<Vec<String>>()
+                .join(" ");
+            (offset, line)
+        })
+        .map(|(offset, line)| format!("{:08x?}: {}", offset, line))
+        .collect();
+
+    format!("{}", lines.join("\n"))
 }
 
+#[wasm_bindgen]
+#[cfg(target_arch = "wasm32")]
+pub fn assemble_object(asm_src: &str) -> RuntimeResultJsSafe<Vec<u8>> {
+    assemble_object_inner(asm_src).map_err(|e| JsValue::from_str(&format!("{:?}", e)))
+}
+
+#[cfg(not(target_arch = "wasm32"))]
 pub fn assemble_object(asm_src: &str) -> RuntimeResult<Vec<u8>> {
+    assemble_object_inner(asm_src)
+}
+
+fn assemble_object_inner(asm_src: &str) -> RuntimeResult<Vec<u8>> {
     let obj = assemble(Backend::Mos6502, asm_src).map_err(RuntimeError::Undefined)?;
     let bin = obj.emit();
     Ok(bin)
