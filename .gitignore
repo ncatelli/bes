@@ -13,3 +13,12 @@ Cargo.lock
 # Added by cargo
 
 /target
+
+# wasm-pack
+bin/
+pkg/
+wasm-pack.log
+
+# www
+
+www/.bin
