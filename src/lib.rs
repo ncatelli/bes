@@ -68,6 +68,9 @@ pub fn hexdump(bytes: &[u8]) -> String {
         .chunks(16)
         .enumerate()
         .map(|(offset, bytes)| {
+            // multiply the line offset by the bytes in the chunk.
+            let line_offset = offset * 16;
+
             let line = bytes
                 .chunks(2)
                 .map(|two_byte_chunk| {
@@ -78,7 +81,7 @@ pub fn hexdump(bytes: &[u8]) -> String {
                 })
                 .collect::<Vec<String>>()
                 .join(" ");
-            (offset, line)
+            (line_offset, line)
         })
         .map(|(offset, line)| format!("{:08x?}: {}", offset, line))
         .collect();
