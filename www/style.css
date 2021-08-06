@@ -1,11 +1,26 @@
 body {
 	background-color:#ffffff;
 }
+
+h1 {
+	text-align: center;
+}
       
 .row {
+	padding-bottom: 10px;
 	display: flex;
+	align-items: center;
 }
       
 .column {
 	flex: 50%;
+	text-align: center;
+}
+
+textarea {
+	background-color: #f8f8f8;
+}
+
+.no-resize {
+	resize: none;
 }

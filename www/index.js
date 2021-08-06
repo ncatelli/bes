@@ -4,7 +4,22 @@ const assemblyInputTextObject = document.getElementById("assemblyInput");
 const assembleBtn = document.getElementById("assembleBtn");
 const binaryOutputTextObject = document.getElementById("binaryOutput");
 
+function download(filename, contentType, data) {
+    var element = document.createElement('a');
+    element.setAttribute('href', contentType + encodeURIComponent(data));
+    element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
 assembleBtn.addEventListener("click", event => {
     var binary = wasm.assemble_object_js(assemblyInputTextObject.value);
-    binaryOutputTextObject.textContent = binary;
+    binaryOutputTextObject.textContent = Buffer.from(binary).toString('hex');
+    // Start file download.
+    download("rom.bin", 'data:application/octet-stream;charset=utf-8,', binary);
 });
