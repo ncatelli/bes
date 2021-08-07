@@ -62,6 +62,8 @@ use spasm::assemble;
 use spasm::Backend;
 use spasm::Emitter;
 
+/// hexdump formats a binary array into a a format emulating the output of xxd
+/// or hexdump.
 #[wasm_bindgen]
 pub fn hexdump(bytes: &[u8]) -> String {
     let lines: Vec<String> = bytes
@@ -71,7 +73,8 @@ pub fn hexdump(bytes: &[u8]) -> String {
             // multiply the line offset by the bytes in the chunk.
             let line_offset = offset * 16;
 
-            let line = bytes
+            // break array into 2-byte chunks.
+            let columns: Vec<String> = bytes
                 .chunks(2)
                 .map(|two_byte_chunk| {
                     two_byte_chunk
@@ -79,14 +82,14 @@ pub fn hexdump(bytes: &[u8]) -> String {
                         .map(|b| format!("{:02x?}", b))
                         .collect()
                 })
-                .collect::<Vec<String>>()
-                .join(" ");
-            (line_offset, line)
+                .collect();
+
+            (line_offset, columns.join(" "))
         })
         .map(|(offset, line)| format!("{:08x?}: {}", offset, line))
         .collect();
 
-    format!("{}", lines.join("\n"))
+    lines.join("\n")
 }
 
 #[wasm_bindgen]
