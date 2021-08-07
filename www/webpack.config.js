@@ -7,10 +7,6 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
     filename: "bootstrap.js",
   },
-  output: {
-    path: path.resolve(__dirname, "dist"),
-    filename: "style.css",
-  },
   mode: "development",
   plugins: [
     new CopyWebpackPlugin(['index.html'])
