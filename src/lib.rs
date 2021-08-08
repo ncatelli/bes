@@ -27,18 +27,70 @@ pub type RuntimeResultJsSafe<T> = Result<T, JsValue>;
 
 // simulator
 
-#[cfg(not(target_arch = "wasm32"))]
 use mainspring::address_map::memory::{Memory, ReadOnly, ReadWrite};
-#[cfg(not(target_arch = "wasm32"))]
 use mainspring::cpu::mos6502::Mos6502;
 
 #[allow(unused)]
 use mainspring::prelude::v1::*;
 
-#[cfg(not(target_arch = "wasm32"))]
 type Rom = Memory<ReadOnly, u16, u8>;
-#[cfg(not(target_arch = "wasm32"))]
 type Ram = Memory<ReadWrite, u16, u8>;
+
+#[cfg(target_arch = "wasm32")]
+const RAM_SIZE: usize = 0x4000;
+#[cfg(target_arch = "wasm32")]
+const ROM_SIZE: usize = 0x8000;
+
+#[wasm_bindgen]
+#[cfg(target_arch = "wasm32")]
+pub struct Mos6502JsSafe {
+    // memory
+    ram: [u8; RAM_SIZE],
+    rom: [u8; ROM_SIZE],
+    // registers
+    pub acc: u8,
+    pub x: u8,
+    pub y: u8,
+    pub sp: u8,
+    pub pc: u16,
+    pub ps: u8,
+}
+
+#[wasm_bindgen]
+#[cfg(target_arch = "wasm32")]
+impl Mos6502JsSafe {
+    pub fn ram(&self) -> Box<[u8]> {
+        Box::new(self.ram.clone())
+    }
+
+    pub fn rom(&self) -> Box<[u8]> {
+        Box::new(self.rom.clone())
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+impl From<Mos6502> for Mos6502JsSafe {
+    fn from(src: Mos6502) -> Self {
+        Self {
+            ram: [0; RAM_SIZE],
+            rom: [0; ROM_SIZE],
+            acc: src.acc.read(),
+            x: src.x.read(),
+            y: src.y.read(),
+            sp: src.sp.read(),
+            pc: src.pc.read(),
+            ps: src.ps.read(),
+        }
+    }
+}
+
+#[wasm_bindgen]
+#[cfg(target_arch = "wasm32")]
+pub fn simulate(cycles: usize, bin: Vec<u8>) -> RuntimeResultJsSafe<Mos6502JsSafe> {
+    simulate_inner(cycles, bin)
+        .map_err(|e| JsValue::from_str(&format!("{:?}", e)))
+        .map(|state| Mos6502JsSafe::from(state))
+}
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn simulate(cycles: usize, bin: Vec<u8>) -> RuntimeResult<Mos6502> {
