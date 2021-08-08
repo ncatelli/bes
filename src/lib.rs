@@ -42,6 +42,10 @@ type Ram = Memory<ReadWrite, u16, u8>;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn simulate(cycles: usize, bin: Vec<u8>) -> RuntimeResult<Mos6502> {
+    simulate_inner(cycles, bin)
+}
+
+fn simulate_inner(cycles: usize, bin: Vec<u8>) -> RuntimeResult<Mos6502> {
     let ram = Ram::new(0x0200, 0x3fff);
     let via = Ram::new(0x6000, 0x7fff);
     let rom = Rom::new(0x8000, 0xffff).load(bin);
