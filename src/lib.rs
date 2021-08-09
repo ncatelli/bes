@@ -71,9 +71,20 @@ impl Mos6502JsSafe {
 #[cfg(target_arch = "wasm32")]
 impl From<Mos6502> for Mos6502JsSafe {
     fn from(src: Mos6502) -> Self {
+        let mut ram = [0u8; RAM_SIZE];
+        ram.iter_mut()
+            .enumerate()
+            .map(|(offset, byte)| (offset as u16, byte))
+            .for_each(|(offset, byte)| *byte = src.address_map.read(offset));
+        let mut rom = [0u8; ROM_SIZE];
+        rom.iter_mut()
+            .enumerate()
+            .map(|(offset, byte)| ((offset as u16 + 0x8000u16), byte))
+            .for_each(|(offset, byte)| *byte = src.address_map.read(offset));
+
         Self {
-            ram: [0; RAM_SIZE],
-            rom: [0; ROM_SIZE],
+            ram: ram,
+            rom: rom,
             acc: src.acc.read(),
             x: src.x.read(),
             y: src.y.read(),
