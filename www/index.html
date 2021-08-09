@@ -23,6 +23,30 @@
       <button id="assembleBtn">Assemble Source</button>
     </div>
     <div class="column">
+      <button id="simulateBtn">Simulate</button>
+    </div>
+  </div>
+
+  <hr />
+
+  <h1>BE6502 Simulator</h1>
+  <div class="row">
+    <div class="column">
+      ACC: <input class="no-resize" readonly id="registerAccOutput" name="registerAccOutput" />
+      <br />
+      X:&nbsp;&nbsp; <input class="no-resize" readonly id="registerXOutput" name="registerXOutput" />
+      <br />
+      Y:&nbsp;&nbsp; <input class="no-resize" readonly id="registerYOutput" name="registerYOutput" />
+      <br />
+      PC:&nbsp; <input class="no-resize" readonly id="registerPCOutput" name="registerPCOutput" />
+      <br />
+      PS:&nbsp; <input class="no-resize" readonly id="registerPSOutput" name="registerPSOutput" />
+      <br />
+      SP:&nbsp; <input class="no-resize" readonly id="registerSPOutput" name="registerSPOutput" />
+      <br />
+    </div>
+    <div class="column">
+      <textarea class="no-resize" readonly id="memoryOutput" name="memoryOutput" rows="26" cols="80"></textarea>
     </div>
   </div>
   <script src="./bootstrap.js"></script>

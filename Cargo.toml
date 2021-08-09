@@ -15,7 +15,7 @@ default = ["console_error_panic_hook"]
 opt-level = "s"
 
 [dependencies]
-wasm-bindgen = "0.2.63"
+wasm-bindgen = "0.2"
 mainspring = { git = "https://github.com/ncatelli/mainspring", branch = "main" }
 spasm = { git = "https://github.com/ncatelli/spasm", branch = "master" }
 scrap = { git = "https://github.com/ncatelli/scrap", branch = "main" }
