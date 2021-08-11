@@ -72,17 +72,16 @@ impl Mos6502JsSafe {
 impl From<Mos6502> for Mos6502JsSafe {
     fn from(src: Mos6502) -> Self {
         let mut ram = [0u8; RAM_SIZE];
-        ram.iter_mut()
-            .enumerate()
-            .map(|(offset, byte)| (offset as u16, byte))
-            .for_each(|(offset, byte)| *byte = src.with_address_map(|am| am.read(offset)));
+        for (offset, byte) in ram.iter_mut().enumerate() {
+            *byte = src.with_address_map(|am| am.read(offset as u16));
+        }
 
         let mut rom = [0u8; ROM_SIZE];
         let rom_base_addr = 0x8000u16;
-        rom.iter_mut()
-            .enumerate()
-            .map(|(offset, byte)| ((offset as u16 + rom_base_addr), byte))
-            .for_each(|(offset, byte)| *byte = src.with_address_map(|am| am.read(offset)));
+        for (idx, byte) in rom.iter_mut().enumerate() {
+            let offset = idx as u16 + rom_base_addr;
+            *byte = src.with_address_map(|am| am.read(offset));
+        }
 
         Self {
             ram: ram,
