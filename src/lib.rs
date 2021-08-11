@@ -75,12 +75,14 @@ impl From<Mos6502> for Mos6502JsSafe {
         ram.iter_mut()
             .enumerate()
             .map(|(offset, byte)| (offset as u16, byte))
-            .for_each(|(offset, byte)| *byte = src.address_map.read(offset));
+            .for_each(|(offset, byte)| *byte = src.with_address_map(|am| am.read(offset)));
+
         let mut rom = [0u8; ROM_SIZE];
+        let rom_base_addr = 0x8000u16;
         rom.iter_mut()
             .enumerate()
-            .map(|(offset, byte)| ((offset as u16 + 0x8000u16), byte))
-            .for_each(|(offset, byte)| *byte = src.address_map.read(offset));
+            .map(|(offset, byte)| ((offset as u16 + rom_base_addr), byte))
+            .for_each(|(offset, byte)| *byte = src.with_address_map(|am| am.read(offset)));
 
         Self {
             ram: ram,
