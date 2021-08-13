@@ -28,3 +28,7 @@ textarea {
 .no-resize {
 	resize: none;
 }
+
+.hidden {
+	display: none;
+}

@@ -7,6 +7,7 @@ const binaryOutputTextObject = document.getElementById("binaryOutput");
 
 // simulator constants
 const simulateBtn = document.getElementById("simulateBtn");
+const simulatorSubSection = document.getElementById("simulatorSubSection");
 const simulatorAccRegisterOutputTextObject = document.getElementById("registerAccOutput");
 const simulatorXRegisterOutputTextObject = document.getElementById("registerYOutput");
 const simulatorYRegisterOutputTextObject = document.getElementById("registerXOutput");
@@ -59,4 +60,6 @@ simulateBtn.addEventListener("click", event => {
     simulatorSPRegisterOutputTextObject.value = state.sp;
 
     simulatorMemoryOutputTextObject.textContent = wasm.hexdump(state.ram())
+
+    simulatorSubSection.classList.remove("hidden");
 });
