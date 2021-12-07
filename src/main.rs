@@ -16,23 +16,26 @@ fn main() {
     let raw_args: Vec<String> = env::args().into_iter().collect::<Vec<String>>();
     let args = raw_args.iter().map(|a| a.as_str()).collect::<Vec<&str>>();
 
+    // Flag definitions
+    let input_file_flag = scrap::WithOpen::new(scrap::FlagWithValue::new(
+        "input-file",
+        "i",
+        "An input path for a source file.",
+        scrap::FileValue::new(true, false, true),
+    ));
+
+    let cycles_flag = scrap::Flag::expect_u64(
+        "cycles",
+        "c",
+        "The number of cycles to run the simulator for.",
+    );
+
     let cmd = scrap::Cmd::new("bes")
         .description("A development assembler/simulator tool for the BE6502")
         .author("Nate Catelli <ncatelli@packetfire.org>")
         .version("0.1.0")
-        .with_flag(scrap::WithOpen::new(scrap::ExpectFilePath::new(
-            "input-file",
-            "i",
-            "an input path for a source file.",
-            true,
-            false,
-            true,
-        )))
-        .with_flag(scrap::Flag::expect_u64(
-            "cycles",
-            "c",
-            "The number of cycles to run the simulator for.",
-        ))
+        .with_flag(input_file_flag)
+        .with_flag(cycles_flag)
         .with_handler(|(input_file, cycles)| {
             read_src_file(input_file).and_then(|src| {
                 assemble_object(&src).map(|binary| simulate(cycles as usize, binary))
