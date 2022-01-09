@@ -12,11 +12,13 @@ fn read_src_file(mut src_file: std::fs::File) -> RuntimeResult<String> {
     }
 }
 
-fn main() {
+fn main() -> Result<(), String> {
     let raw_args: Vec<String> = env::args().into_iter().collect::<Vec<String>>();
     let args = raw_args.iter().map(|a| a.as_str()).collect::<Vec<&str>>();
 
     // Flag definitions
+    let help_flag = scrap::Flag::store_true("help", "h", "display usage information.").optional();
+
     let input_file_flag = scrap::WithOpen::new(scrap::FlagWithValue::new(
         "input-file",
         "i",
@@ -36,20 +38,27 @@ fn main() {
         .version("0.1.0")
         .with_flag(input_file_flag)
         .with_flag(cycles_flag)
-        .with_handler(|(input_file, cycles)| {
+        .with_flag(help_flag)
+        .with_handler(|((input_file, cycles), _)| {
             read_src_file(input_file).and_then(|src| {
                 assemble_object(&src).map(|binary| simulate(cycles as usize, binary))
             })
         });
 
     let help_string = cmd.help();
-    let eval_res = cmd
-        .evaluate(&args[..])
-        .map_err(|e| RuntimeError::Undefined(e.to_string()))
-        .and_then(|flags| cmd.dispatch(flags));
-
-    match eval_res {
-        Ok(Ok(cpu)) => println!("{:#?}", cpu),
-        Ok(Err(e)) | Err(e) => println!("error: {}\n\n{}", &e.to_string(), &help_string),
-    }
+    cmd.evaluate(&args[..])
+        .map_err(|e| RuntimeError::Undefined(e.to_string()).to_string())
+        .and_then(|(flags, help)| {
+            if help.is_none() {
+                cmd.dispatch((flags, help))
+                    // On success print the state
+                    .map(|cpu| println!("{:#?}", cpu))
+                    // On failure, format an error.
+                    .map_err(|e| format!("{}\n\n{}", &e.to_string(), &help_string))
+            } else {
+                println!("{:?}", &help_string);
+                Ok(())
+            }
+        })
+        .map_err(|e| e.to_string())
 }
