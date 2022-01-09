@@ -18,7 +18,10 @@ impl std::fmt::Debug for RuntimeError {
 
 impl std::fmt::Display for RuntimeError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?}", &self)
+        match self {
+            Self::Simulator(e) => write!(f, "simulator error: {}", e),
+            Self::Undefined(s) => write!(f, "{}", s),
+        }
     }
 }
 
