@@ -1,6 +1,6 @@
 # See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.194.3/containers/rust/.devcontainer/base.Dockerfile
 
-FROM mcr.microsoft.com/vscode/devcontainers/base:stretch
+FROM mcr.microsoft.com/vscode/devcontainers/base:bullseye
 
 ENV NVM_VERSION="v0.38.0"
 ENV USERNAME="vscode"
