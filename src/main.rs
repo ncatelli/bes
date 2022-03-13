@@ -48,17 +48,22 @@ fn main() -> Result<(), String> {
     let help_string = cmd.help();
     cmd.evaluate(&args[..])
         .map_err(|e| RuntimeError::Undefined(e.to_string()).to_string())
-        .and_then(|(flags, help)| {
-            if help.is_none() {
-                cmd.dispatch((flags, help))
-                    // On success print the state
-                    .map(|cpu| println!("{:#?}", cpu))
-                    // On failure, format an error.
-                    .map_err(|e| format!("{}\n\n{}", &e.to_string(), &help_string))
-            } else {
-                println!("{:?}", &help_string);
-                Ok(())
-            }
-        })
+        .and_then(
+            |scrap::Value {
+                 value: (flags, help),
+                 span,
+             }| {
+                if help.is_none() {
+                    cmd.dispatch(scrap::Value::new(span, (flags, help)))
+                        // On success print the state
+                        .map(|cpu| println!("{:#?}", cpu))
+                        // On failure, format an error.
+                        .map_err(|e| format!("{}\n\n{}", &e.to_string(), &help_string))
+                } else {
+                    println!("{:?}", &help_string);
+                    Ok(())
+                }
+            },
+        )
         .map_err(|e| e.to_string())
 }

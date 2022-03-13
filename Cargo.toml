@@ -17,8 +17,8 @@ opt-level = "s"
 [dependencies]
 wasm-bindgen = "0.2"
 mainspring = { git = "https://github.com/ncatelli/mainspring", branch = "main" }
-spasm = { git = "https://github.com/ncatelli/spasm", branch = "master" }
-scrap = { git = "https://github.com/ncatelli/scrap", branch = "main" }
+spasm = { git = "https://github.com/ncatelli/spasm", branch = "main" }
+scrap = { git = "https://github.com/ncatelli/scrap", tag = "v1.0.0" }
 
 # The `console_error_panic_hook` crate provides better debugging of panics by
 # logging them with `console.error`. This is great for development, but requires

@@ -10,6 +10,7 @@ cargo build --release
 
 ### Browser
 ```
+npm install
 wasm-pack build
 cd www/
 npm run start
