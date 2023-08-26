@@ -22,7 +22,7 @@ jobs:
       - name: Install nodejs
         uses: actions/setup-node@v1
         with:
-          node-version: 16.13
+          node-version: "lts/*"
 
       - name: Release build
         uses: actions-rs/cargo@v1
