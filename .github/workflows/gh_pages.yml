@@ -22,7 +22,7 @@ jobs:
           version: latest
           use-tool-cache: true 
       - name: Install nodejs
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: "lts/*"
 
@@ -56,7 +56,7 @@ jobs:
           version: latest
           use-tool-cache: true 
       - name: Install nodejs
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: "lts/*"
 
