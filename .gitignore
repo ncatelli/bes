@@ -22,3 +22,8 @@ wasm-pack.log
 # www
 
 www/.bin
+
+# semantic-release dependencies
+/node_modules
+/package.json
+/package-lock.json
